@@ -6,17 +6,22 @@ import ExchangeTable from '../../components/exchangeTable/exchangeTable';
 import ExchangeForm from '../../components/exchangeForm/excchangeForm';
 import getRates from '../../providers/rates';
 import { rateList } from '@exchange/sharedTypes';
+import { useState } from 'react';
 
 const Container = styled.div`
   display: flex;  
-  width:80vw;
+  flex-direction:column;
+  margin-top:10vh;
+  height:80vh;  
   justify-content:center;
-  margin:0 auto;
+  align-items:center;  
 `;
 
 //padding: ${(theme) => theme.boxes.padding},
 // border:  ${(theme) => theme.boxes.border}
+
 export default function MainView() {
+  const [selectedExchanges, setSelectedExchanges] = useState<{ from: string, to: string } | null>(null)
   const query = useQuery<rateList>({ queryKey: ['rates'], queryFn: getRates });
 
   if (query.status === 'error') {
@@ -31,8 +36,16 @@ export default function MainView() {
 
       {query.status === 'success' &&
         <>
-          <ExchangeForm rates={query.data?.rates} />
-          <ExchangeTable rates={query.data?.rates} lastUpdate={query.data.publishedDate} />
+          <ExchangeForm
+            rates={query.data?.rates}
+            onSelectionChange={(from: string, to: string) => ()}
+          />
+
+          <ExchangeTable
+            rates={query.data?.rates}
+            lastUpdate={query.data.publishedDate}
+            selectedExchanges={selectedExchanges}
+          />
         </>
       }
 
