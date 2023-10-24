@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@exchange/sharedTypes": ["libs/sharedTypes/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -1,22 +1,22 @@
 {
-  "name": "rate-e2e",
+  "name": "fe-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/rate-e2e/src",
+  "sourceRoot": "apps/fe-e2e/src",
   "projectType": "application",
   "targets": {
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/rate-e2e/cypress.config.ts",
-        "devServerTarget": "rate:serve:development",
+        "cypressConfig": "apps/fe-e2e/cypress.config.ts",
+        "devServerTarget": "fe:serve:development",
         "testingType": "e2e"
       },
       "configurations": {
         "production": {
-          "devServerTarget": "rate:serve:production"
+          "devServerTarget": "fe:serve:production"
         },
         "ci": {
-          "devServerTarget": "rate:serve-static"
+          "devServerTarget": "fe:serve-static"
         }
       }
     },
@@ -24,10 +24,10 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/rate-e2e/**/*.{js,ts}"]
+        "lintFilePatterns": ["apps/fe-e2e/**/*.{js,ts}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["rate"]
+  "implicitDependencies": ["fe"]
 }
