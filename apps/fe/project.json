@@ -19,7 +19,8 @@
         "styles": [],
         "scripts": [],
         "isolatedConfig": true,
-        "webpackConfig": "apps/fe/webpack.config.js"
+        "webpackConfig": "apps/fe/webpack.config.js",
+        "generatePackageJson": true
       },
       "configurations": {
         "development": {

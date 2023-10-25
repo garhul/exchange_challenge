@@ -1,0 +1,59 @@
+# -------------------------------------------------------------------------
+# Action to build a docker image and upload it to the registry
+#
+# [NOTE: For simplification at this stage the image contains both the api and frontend to be served from a single point]
+#
+# To be triggered after a manual dispatch
+#
+# Steps:
+# -- build app
+# -- copy distributables to the image
+# -- upload the image to the registry
+# -- a je to!
+#
+# --------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: install deps
+        run: npm install
+
+      - name: Run tests
+        run: echo "No tests, living on the edge"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DOCTL_API_KEY }}
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build image
+        run: docker build -t ${{ vars.CONTAINER_REGISTRY }}/exchange:latest -t exchange:latest -t exchange:$(git rev-parse --short "$GITHUB_SHA") .
+
+      - name: Inspect image
+        run: docker inspect -f "{{ .Size }}" exchange:latest
+
+      - name: Login to Digital Ocean Registry
+        run: doctl registry login --expiry-seconds 1800
+
+      - name: Push image to registry
+        run: docker push ${{ vars.CONTAINER_REGISTRY }}/exchange:latest
