@@ -2,7 +2,9 @@
   "name": "@rate/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "npx nx run-many --target=build --projects=fe,api --parallel=true --prod"
+  },
   "private": true,
   "dependencies": {
     "@swc/helpers": "~0.5.0",
