@@ -5,7 +5,10 @@ import getRates from './providers/ratesProvider';
 
 const app = express();
 app.use(cors());
-// app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+//Frontend is copied to /app/fe inside of docker container, 
+//this is not elegant but is quick and simple
+app.use(express.static(path.join('/app/fe')));
 
 app.get('/api/rates', async (req, res) => {
   try {
@@ -16,7 +19,7 @@ app.get('/api/rates', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3333;
+const port = process.env.PORT || 3030;
 
 const server = app.listen(port, () => {
   console.info(`Server started on port ${port}`);
