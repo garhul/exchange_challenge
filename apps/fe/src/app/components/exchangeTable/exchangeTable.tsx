@@ -1,24 +1,21 @@
 import styled from "styled-components";
 import { rateItem } from "@exchange/sharedTypes";
 
-
 const StyledTable = styled.table`
-  width:80%;
+  min-width:40%;
   caption-side:bottom;
-  border-spacing: 0;
-  border:.5em solid #677282;
-  border-radius:.5em;  
-  color:#333;
+  border-spacing: 0;  
+  color:${({ theme }) => theme.colors.fgLighter};
   box-shadow:.25em .25em .5em rgba(0,0,0,.2);
 
   tbody tr {
-    background-color:#ddd;
+    background-color: ${({ theme }) => theme.colors.bgTblRow};
     :nth-of-type(odd) {
-      background-color: #eee;
+      background-color: ${({ theme }) => theme.colors.bgTblRowOdd};
     }
     :hover {
-      background-color: #b5d9db;
-      color:#000;
+      background-color: ${({ theme }) => theme.colors.secondary};
+      color: ${({ theme }) => theme.colors.fgDarkest};
     }
   }
 
@@ -29,17 +26,13 @@ const StyledTable = styled.table`
     }
   }
 
-  tbody tr.to {
-    background-color:#ffc0cc;
-  }
-
-  tbody tr.from {
-    background-color:#c0ffcc;
+  tbody tr.selected {    
+    background-color:${({ theme }) => `${theme.colors.primary}99`};    
   }
 
   caption {
     font-size:.9em;
-    color:#9f9f9f;
+    color:${({ theme }) => theme.colors.fgLighter2};
     text-align:right;
     text-transform:lowercase;
     margin-top:.5em;
@@ -49,18 +42,18 @@ const StyledTable = styled.table`
     font-size:1em;
     font-weight:400;
     text-transform:uppercase;
-    background-color: #677282;
-    color:#f0f0f0;
+    background-color: ${({ theme }) => theme.colors.bgTblHeader};
+    color:${({ theme }) => theme.colors.fgLightest};
     height:2em;    
     text-align:left;
     th {
       padding-left:.5em;
+      text-shadow: 0.1em 0.1em 0.1em rgba(0,0,0,.3);
       :nth-child(4) {
         text-align:right;
         padding-right:.5em;
       }
     }
-    
   }
 `;
 
@@ -74,12 +67,10 @@ const TableContainer = styled.div`
 export type exchangeTableProps = {
   lastUpdate: Date;
   rates: Record<string, rateItem>;
-  selectedExchanges: { from: string, to: string };
+  selectedCurrency: string;
 }
 
-export default function ExchangeTable({ rates, lastUpdate, selectedExchanges }: exchangeTableProps) {
-  console.log({ rates, lastUpdate, selectedExchanges });
-
+export default function ExchangeTable({ rates, lastUpdate, selectedCurrency }: exchangeTableProps) {
   return (
     <TableContainer>
       <StyledTable>
@@ -88,14 +79,14 @@ export default function ExchangeTable({ rates, lastUpdate, selectedExchanges }: 
             <th>Country</th>
             <th>Currency</th>
             <th>Code</th>
-            <th>Exchange (1 CZK)</th>
+            <th>Exchange (per 1 CZK)</th>
           </tr>
         </thead>
         <tbody>
           {Object.keys(rates).map(code => (
             <tr
               key={`row_${code}`}
-              className={(code === selectedExchanges.from) ? 'from' : (code === selectedExchanges.to) ? 'to' : ''}
+              className={(code === selectedCurrency) ? 'selected' : ''}
             >
               <td>{rates[code].country}</td>
               <td>{rates[code].currency}</td>

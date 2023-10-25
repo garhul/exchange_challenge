@@ -6,45 +6,48 @@ import ExchangeTable from '../../components/exchangeTable/exchangeTable';
 import ExchangeForm from '../../components/exchangeForm/excchangeForm';
 import getRates from '../../providers/rates';
 import { rateList } from '@exchange/sharedTypes';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const Container = styled.div`
   display: flex;  
-  flex-direction:column;
-  margin-top:10vh;
-  height:80vh;  
+  flex-direction:column;  
   justify-content:center;
-  align-items:center;  
+  align-items:center;
+  margin-top:5vh;
 `;
 
-//padding: ${(theme) => theme.boxes.padding},
-// border:  ${(theme) => theme.boxes.border}
-
 export default function MainView() {
-  const [selectedExchanges, setSelectedExchanges] = useState<{ from: string, to: string } | null>(null)
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const query = useQuery<rateList>({ queryKey: ['rates'], queryFn: getRates });
 
   if (query.status === 'error') {
     console.error(query.error.message);
   }
 
+  useEffect(() => {
+    if (query.status === 'success')
+      setSelectedCurrency(Object.keys(query.data.rates)[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.status]);
+
   return (
     <Container>
       {query.status === 'pending' &&
-        <Alert variant='notice'>Loading data</Alert>
+        <Alert variant='info'>Loading exchange rates</Alert>
       }
 
       {query.status === 'success' &&
         <>
           <ExchangeForm
             rates={query.data?.rates}
-            onSelectionChange={(from: string, to: string) => ()}
+            selectedCurrency={selectedCurrency}
+            onCurrencySelected={setSelectedCurrency}
           />
 
           <ExchangeTable
             rates={query.data?.rates}
             lastUpdate={query.data.publishedDate}
-            selectedExchanges={selectedExchanges}
+            selectedCurrency={selectedCurrency}
           />
         </>
       }

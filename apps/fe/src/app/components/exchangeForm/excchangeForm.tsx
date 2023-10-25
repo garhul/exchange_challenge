@@ -1,10 +1,10 @@
 import { rateItem } from "@exchange/sharedTypes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 const StyledForm = styled.div`
   display:inline-flex;
-  padding:2em;  
+  padding:1em;  
   font-size:1.2em;
   align-items:center;
 
@@ -23,38 +23,17 @@ const StyledForm = styled.div`
     }
   }
 
-  button {
-    cursor:pointer;
-    border-radius:.5em;
-    background-color:#ffc79B;
-    margin-left:2em;
-    font-size:1em;
-    padding:.5em;
-    border:1px solid #ffaa66;
-    box-shadow: .1em .1em .1em rgba(0,0,0,.3);
-    :hover {
-      filter:brightness(105%);
-    }
-    :active {
-      box-shadow: none;      
-    }
-    :disabled {
-      filter:saturate(10%);
-      box-shadow: none;
-      cursor:not-allowed;
-    }
-  }
-
   input[type=number] {
-    color:#444;
-    margin-left:1em;  
+    color:${({ theme }) => theme.colors.fgLighter};
+    width:6em;
+    margin:0em 1em;  
     font-size:1.2em;
     background:none;
     border:none;    
-    border-bottom:2px solid #FFC80A ;
+    border-bottom:2px solid ${({ theme }) => theme.colors.primary} ;
     :focus {
       outline: none;
-      color:#222;    
+      color:${({ theme }) => theme.colors.fg};    
     }
   }
 
@@ -69,11 +48,24 @@ const StyledForm = styled.div`
   }
 `
 
+const ConversionResult = styled.div`
+  font-size:1.4em;
+  height:2em;
+  span {  
+    font-weight:bold;
+    margin:0em .5em;    
+  }
+  .placeholder {
+    font-weight:400;
+  }
+`;
+
 type currencySelectorProps = {
   onChange: (code: string) => void;
   value: string;
   options: [string, string][];
   label: string;
+
 };
 
 export function CurrencySelector({ onChange, options, label, value }: currencySelectorProps) {
@@ -81,28 +73,20 @@ export function CurrencySelector({ onChange, options, label, value }: currencySe
     <div>
       <label htmlFor="opt">{label}</label>
       <select id="opt" onChange={(ev) => onChange(ev.target.value)} value={value}>
-        {options.map(opt => (<option value={opt[0]}>{opt[1]}</option>))}
+        {options.map(opt => (<option key={`opt_${opt[0]}`} value={opt[0]}>{`${opt[0]} - ${opt[1]}`}</option>))}
       </select>
     </div>
   )
 }
 
-export default function ExchangeForm({ rates }: { rates: Record<string, rateItem> }) {
-  const [amount, setAmount] = useState<number | null>(null);
-  const [selectedExchanges, setSelectedExchanges] = useState<{ from: string, to: string }>({ from: 'CZK', to: '' });
-  const [canConvert, setCanConvert] = useState(false);
+export type exchangeFormProps = {
+  onCurrencySelected: (currency: string) => void;
+  selectedCurrency: string;
+  rates: Record<string, rateItem>;
+}
 
-  useEffect(() => {
-    if (
-      (amount !== null && amount > 0) &&
-      (selectedExchanges.from !== '' && selectedExchanges.to !== '')
-    ) {
-      setCanConvert(true)
-    } else {
-      setCanConvert(false);
-    }
-  }, [selectedExchanges, amount])
-
+export default function ExchangeForm({ rates, onCurrencySelected, selectedCurrency }: exchangeFormProps) {
+  const [amount, setAmount] = useState<number>(0);
 
   const updateAmount = (value: string) => {
     const n = parseFloat(value);
@@ -110,31 +94,29 @@ export default function ExchangeForm({ rates }: { rates: Record<string, rateItem
     setAmount(n);
   };
 
-  const handleExchangeSelection = (type: 'from' | 'to', currency: string) => {
-
-  }
-
-  const doConversion = () => {
-    console.log({ amount, selectedExchanges });
-  }
-
   return (
-    <StyledForm>
-      convert
-      <input placeholder="Amount" type='number' value={amount || ''} onChange={(ev) => updateAmount(ev.target.value)} />
-      <CurrencySelector
-        onChange={(value) => setSelectedExchanges(v => ({ ...v, ...{ from: value } }))}
-        value={selectedExchanges.from}
-        options={Object.keys(rates).map(k => [k, rates[k].currency])}
-        label=""
-      />
-      <CurrencySelector
-        onChange={(value) => setSelectedExchanges(v => ({ ...v, ...{ to: value } }))}
-        value={selectedExchanges.to}
-        options={Object.keys(rates).map(k => [k, rates[k].currency])}
-        label="to"
-      />
-      <button disabled={!canConvert} onClick={() => doConversion()}>Calculate</button>
-    </StyledForm>
+    <>
+      <StyledForm>
+        convert
+        <input placeholder="amount" type='number' value={amount === 0 ? '' : amount} onChange={(ev) => updateAmount(ev.target.value)} />
+        CZK
+        <CurrencySelector
+          onChange={onCurrencySelected}
+          value={selectedCurrency}
+          options={Object.keys(rates).map(k => [k, rates[k].currency])}
+          label="to"
+        />
+      </StyledForm>
+      <ConversionResult>
+        {(amount > 0) ?
+          <>
+            <span>{amount.toFixed(2)} CZK</span>=
+            <span>{(amount * rates[selectedCurrency].rate).toFixed(2)} {selectedCurrency}</span>
+          </>
+          :
+          <span className="placeholder">enter an amount to begin conversion</span>
+        }
+      </ConversionResult>
+    </>
   )
 }
